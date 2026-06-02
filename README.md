@@ -61,7 +61,8 @@ All data is stored in your browser's `localStorage`. Nothing is sent to any serv
 
 ## Screenshots
 
-> Add screenshots here once deployed
+<img width="1706" height="963" alt="image" src="https://github.com/user-attachments/assets/eaf8f1f1-77da-44e6-bf89-6fd9a7d8b064" />
+
 
 ## License
 
