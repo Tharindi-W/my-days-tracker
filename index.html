@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Days">
+<meta name="theme-color" content="#1D9E75">
+<link rel="manifest" href="manifest.json">
+<title>My Days</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F5F0;--surface:#FFFFFF;--surface2:#F0EDE6;--surface3:#E8E5DC;
+  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.13);
+  --text:#1A1A18;--text2:#6B6960;--text3:#A8A49C;
+  --teal:#1D9E75;--teal-bg:#E1F5EE;--teal-dark:#0F6E56;
+  --purple:#7F77DD;--purple-bg:#EEEDFE;--purple-dark:#534AB7;
+  --pink:#D4537E;--pink-bg:#FBEAF0;--pink-dark:#993556;
+  --amber:#BA7517;--amber-bg:#FAEEDA;--amber-dark:#854F0B;
+  --red:#E24B4A;--red-bg:#FCEBEB;--red-dark:#A32D2D;
+  --r:12px;--rs:8px;
+  --font:'DM Sans',sans-serif;--serif:'DM Serif Display',serif;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#141412;--surface:#1E1D1A;--surface2:#252420;--surface3:#2E2C28;
+    --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+    --text:#F0EDE6;--text2:#9A9790;--text3:#5A5850;
+    --teal-bg:#04342C;--teal-dark:#5DCAA5;
+    --purple-bg:#26215C;--purple-dark:#AFA9EC;
+    --pink-bg:#4B1528;--pink-dark:#ED93B1;
+    --amber-bg:#412402;--amber-dark:#EF9F27;
+    --red-bg:#501313;--red-dark:#F09595;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;overflow-x:hidden}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;padding-bottom:calc(72px + var(--safe-bottom))}
+.screen.active{display:block}
+
+/* ── HEADER ── */
+.hdr{padding:calc(48px + env(safe-area-inset-top,0px)) 20px 16px;background:var(--surface);border-bottom:.5px solid var(--border2);position:sticky;top:0;z-index:10}
+.hdr-title{font-family:var(--serif);font-size:26px;color:var(--text);line-height:1.2}
+.hdr-sub{font-size:13px;color:var(--text2);margin-top:3px}
+
+/* ── NAV ── */
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:.5px solid var(--border2);display:flex;padding:6px 0 calc(6px + var(--safe-bottom));z-index:50}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 4px;background:none;border:none;cursor:pointer;color:var(--text3);font-family:var(--font);font-size:10px;font-weight:500;letter-spacing:.01em}
+.nav-btn.on{color:var(--teal)}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── CHIPS ── */
+.chips{display:flex;gap:7px;padding:14px 20px 4px;flex-wrap:wrap}
+.chip{padding:7px 15px;border-radius:99px;border:.5px solid var(--border2);background:var(--surface);font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);font-family:var(--font);transition:all .15s}
+.chip.on-weekday{background:var(--purple-bg);color:var(--purple-dark);border-color:var(--purple)}
+.chip.on-hiking{background:var(--teal-bg);color:var(--teal-dark);border-color:var(--teal)}
+.chip.on-cookday{background:var(--amber-bg);color:var(--amber-dark);border-color:var(--amber)}
+
+/* ── RING ── */
+.ring-wrap{display:flex;justify-content:center;padding:20px 0 8px}
+.ring-rel{position:relative;width:120px;height:120px}
+.ring-svg{transform:rotate(-90deg)}
+.ring-bg-c{fill:none;stroke:var(--surface2);stroke-width:10}
+.ring-fg{fill:none;stroke:var(--teal);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .4s ease}
+.ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-size:26px;font-weight:500;color:var(--text)}
+.ring-frac{font-size:12px;color:var(--text2)}
+
+/* ── SECTION LABEL ── */
+.sec{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:14px 20px 7px}
+
+/* ── TASKS ── */
+.tl{display:flex;flex-direction:column;gap:6px;padding:0 20px}
+.ti{display:flex;align-items:center;gap:11px;padding:12px 13px;background:var(--surface);border-radius:var(--rs);border:.5px solid var(--border);cursor:pointer;user-select:none;-webkit-user-select:none;transition:opacity .15s}
+.ti.done{opacity:.5}
+.ti-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.ti.done .ti-check{background:var(--teal);border-color:var(--teal)}
+.ti-check svg{width:12px;height:12px;stroke:#fff;stroke-width:2.5;fill:none;display:none}
+.ti.done .ti-check svg{display:block}
+.ti-name{flex:1;font-size:14px;color:var(--text);line-height:1.35}
+.ti.done .ti-name{text-decoration:line-through;color:var(--text3)}
+.ti-time{font-size:12px;color:var(--text3);white-space:nowrap}
+
+/* ── HERO BANNERS ── */
+.hero{margin:14px 20px 0;border-radius:var(--r);padding:18px;text-align:center}
+.hero-hike{background:var(--teal-bg)}
+.hero-cook{background:var(--amber-bg)}
+.hero-icon{font-size:30px;margin-bottom:5px}
+.hero-title{font-family:var(--serif);font-size:19px;margin-bottom:3px}
+.hero-hike .hero-title{color:var(--teal-dark)}
+.hero-cook .hero-title{color:var(--amber-dark)}
+.hero-sub{font-size:12px;line-height:1.55}
+.hero-hike .hero-sub{color:var(--teal-dark);opacity:.85}
+.hero-cook .hero-sub{color:var(--amber-dark);opacity:.85}
+
+/* ── MOOD ── */
+.mood-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 20px}
+.mood-btn{padding:10px;border-radius:var(--rs);border:.5px solid var(--border);background:var(--surface);font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);font-family:var(--font);text-align:center;transition:all .15s}
+.mood-btn.on{background:var(--teal-bg);color:var(--teal-dark);border-color:var(--teal)}
+
+/* ── TEXTAREA ── */
+.note-wrap{padding:0 20px}
+.note-ta{width:100%;min-height:68px;padding:11px 13px;border-radius:var(--rs);border:.5px solid var(--border2);background:var(--surface);color:var(--text);font-size:14px;font-family:var(--font);resize:none;outline:none;line-height:1.5}
+.note-ta::placeholder{color:var(--text3)}
+
+/* ── SAVE ── */
+.save-wrap{padding:12px 20px 0}
+.save-btn{width:100%;padding:14px;border-radius:var(--rs);border:none;background:var(--teal);color:#fff;font-size:15px;font-weight:500;font-family:var(--font);cursor:pointer;transition:opacity .15s}
+.save-btn:active{opacity:.8}
+.save-msg{text-align:center;font-size:13px;color:var(--teal);padding:7px 0 0;min-height:22px}
+
+/* ── STATS GRID ── */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:14px 20px 0}
+.sc{background:var(--surface);border-radius:var(--rs);padding:12px 14px;border:.5px solid var(--border)}
+.sc-num{font-size:24px;font-weight:500;color:var(--text)}
+.sc-lbl{font-size:12px;color:var(--text2);margin-top:1px}
+
+/* ── HISTORY LIST ── */
+.hist-list{display:flex;flex-direction:column;gap:8px;padding:14px 20px 0}
+.hc{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);padding:13px 15px;cursor:pointer;transition:border-color .15s}
+.hc:active{border-color:var(--border2)}
+.hc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.hc-date{font-size:14px;font-weight:500;color:var(--text)}
+.hc-badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px}
+.b-weekday{background:var(--purple-bg);color:var(--purple-dark)}
+.b-hiking{background:var(--teal-bg);color:var(--teal-dark)}
+.b-cookday{background:var(--amber-bg);color:var(--amber-dark)}
+.hc-bar-bg{height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-bottom:7px}
+.hc-bar-fill{height:100%;background:var(--teal);border-radius:99px}
+.hc-foot{display:flex;justify-content:space-between;font-size:12px;color:var(--text2)}
+.hc-note{font-size:12px;color:var(--text2);margin-top:5px;font-style:italic;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:52px 20px;color:var(--text3)}
+.empty-icon{font-size:38px;margin-bottom:10px}
+.empty-txt{font-size:14px;line-height:1.7}
+
+/* ── GOAL BARS ── */
+.goal-list{display:flex;flex-direction:column;gap:9px;padding:14px 20px 0}
+.gcard{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);padding:13px 15px}
+.g-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;gap:8px}
+.g-title{font-size:14px;font-weight:500;line-height:1.35;flex:1}
+.g-days{font-size:12px;color:var(--text2);white-space:nowrap;margin-top:1px}
+.g-bar-bg{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-bottom:7px}
+.g-bar-fill{height:100%;border-radius:99px;transition:width .5s ease}
+.g-sub{font-size:12px;color:var(--text3)}
+
+/* ── CALENDAR ── */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 4px}
+.cal-mon{font-size:15px;font-weight:500}
+.cal-arr{width:32px;height:32px;border-radius:50%;border:.5px solid var(--border2);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text2);font-family:var(--font)}
+.cal-wrap{padding:0 20px}
+.cal-lbl{font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:500}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dl{font-size:10px;color:var(--text3);text-align:center;padding:2px 0;font-weight:600}
+.cal-cell{aspect-ratio:1;border-radius:5px;background:var(--surface2)}
+.cal-cell.partial{background:var(--teal-bg)}
+.cal-cell.full{background:var(--teal)}
+.cal-cell.today{outline:2px solid var(--teal);outline-offset:1px}
+
+/* ── DATA MGMT ── */
+.data-section{padding:14px 20px 0}
+.data-card{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);padding:15px}
+.data-card+.data-card{margin-top:9px}
+.data-title{font-size:14px;font-weight:500;margin-bottom:4px}
+.data-desc{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:12px}
+.data-btn{width:100%;padding:11px;border-radius:var(--rs);border:.5px solid var(--border2);background:transparent;font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;color:var(--text);transition:background .15s}
+.data-btn:active{background:var(--surface2)}
+.data-btn.danger{color:var(--red-dark);border-color:var(--red)}
+.data-btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.data-msg{font-size:13px;color:var(--teal);margin-top:8px;min-height:20px;text-align:center}
+.data-msg.err{color:var(--red-dark)}
+#file-input{display:none}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-end}
+.overlay.open{display:flex}
+.sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-height:82vh;overflow-y:auto;padding:18px 20px calc(20px + var(--safe-bottom))}
+.handle{width:36px;height:4px;background:var(--border2);border-radius:99px;margin:0 auto 16px}
+.m-date{font-family:var(--serif);font-size:20px;margin-bottom:4px}
+.m-task{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:.5px solid var(--border)}
+.m-task:last-of-type{border-bottom:none}
+.m-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.m-dot.done{background:var(--teal)}
+.m-dot.miss{background:var(--border2)}
+.m-tname{font-size:13px;color:var(--text2)}
+.m-tname.done{color:var(--text)}
+.m-extra{margin-top:12px;padding:11px 13px;background:var(--surface2);border-radius:var(--rs);font-size:13px;color:var(--text2);font-style:italic;line-height:1.5}
+.m-close{margin-top:14px;width:100%;padding:12px;border-radius:var(--rs);border:.5px solid var(--border2);background:transparent;font-size:14px;font-family:var(--font);color:var(--text2);cursor:pointer}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:calc(80px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:9px 18px;border-radius:99px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;z-index:300;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- TODAY -->
+<div class="screen active" id="s-today">
+  <div class="hdr">
+    <div class="hdr-title" id="greeting">Good morning</div>
+    <div class="hdr-sub" id="today-lbl"></div>
+  </div>
+
+  <div class="chips">
+    <button class="chip" id="ch-weekday" onclick="setType('weekday')">Weekday</button>
+    <button class="chip" id="ch-hiking"  onclick="setType('hiking')">Hiking day</button>
+    <button class="chip" id="ch-cookday" onclick="setType('cookday')">Cook day</button>
+  </div>
+
+  <!-- WEEKDAY -->
+  <div id="v-weekday">
+    <div class="ring-wrap"><div class="ring-rel">
+      <svg class="ring-svg" width="120" height="120" viewBox="0 0 120 120">
+        <circle class="ring-bg-c" cx="60" cy="60" r="50"/>
+        <circle class="ring-fg" id="rf-wd" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+      </svg>
+      <div class="ring-inner"><span class="ring-pct" id="rp-wd">0%</span><span class="ring-frac" id="rf2-wd">0/0</span></div>
+    </div></div>
+    <div class="sec">Morning</div><div class="tl" id="tl-morning"></div>
+    <div class="sec">Body</div><div class="tl" id="tl-body"></div>
+    <div class="sec">Mind</div><div class="tl" id="tl-mind"></div>
+    <div class="sec">Career</div><div class="tl" id="tl-career"></div>
+    <div class="sec">Home</div><div class="tl" id="tl-home"></div>
+    <div class="sec">Night</div><div class="tl" id="tl-night"></div>
+  </div>
+
+  <!-- HIKING -->
+  <div id="v-hiking" style="display:none">
+    <div class="hero hero-hike">
+      <div class="hero-icon">🥾</div>
+      <div class="hero-title">Hiking day</div>
+      <div class="hero-sub">Today is not about productivity.<br>Today is about you being alive and outside.</div>
+    </div>
+    <div class="ring-wrap"><div class="ring-rel">
+      <svg class="ring-svg" width="120" height="120" viewBox="0 0 120 120">
+        <circle class="ring-bg-c" cx="60" cy="60" r="50"/>
+        <circle class="ring-fg" id="rf-hk" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+      </svg>
+      <div class="ring-inner"><span class="ring-pct" id="rp-hk">0%</span><span class="ring-frac" id="rf2-hk">0/0</span></div>
+    </div></div>
+    <div class="sec">Goals</div><div class="tl" id="tl-hiking"></div>
+  </div>
+
+  <!-- COOK DAY -->
+  <div id="v-cookday" style="display:none">
+    <div class="hero hero-cook">
+      <div class="hero-icon">🍛</div>
+      <div class="hero-title">Cook day</div>
+      <div class="hero-sub">Nourish yourself. Feed the week ahead.</div>
+    </div>
+    <div class="ring-wrap"><div class="ring-rel">
+      <svg class="ring-svg" width="120" height="120" viewBox="0 0 120 120">
+        <circle class="ring-bg-c" cx="60" cy="60" r="50"/>
+        <circle class="ring-fg" id="rf-ck" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+      </svg>
+      <div class="ring-inner"><span class="ring-pct" id="rp-ck">0%</span><span class="ring-frac" id="rf2-ck">0/0</span></div>
+    </div></div>
+    <div class="sec">Tasks</div><div class="tl" id="tl-cookday"></div>
+  </div>
+
+  <div class="sec">How did today feel?</div>
+  <div class="mood-grid" id="mood-grid"></div>
+
+  <div class="sec">One note for today</div>
+  <div class="note-wrap"><textarea class="note-ta" id="day-note" placeholder="What went well, what to fix tomorrow..."></textarea></div>
+
+  <div class="save-wrap">
+    <button class="save-btn" onclick="saveToday()">Save today</button>
+    <div class="save-msg" id="save-msg"></div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="screen" id="s-history">
+  <div class="hdr">
+    <div class="hdr-title">History</div>
+    <div class="hdr-sub" id="hist-sub">Your days, logged</div>
+  </div>
+  <div class="stats-grid" id="hist-stats"></div>
+  <div class="hist-list" id="hist-list"></div>
+</div>
+
+<!-- PROGRESS -->
+<div class="screen" id="s-progress">
+  <div class="hdr">
+    <div class="hdr-title">Progress</div>
+    <div class="hdr-sub">Goals and streaks</div>
+  </div>
+  <div class="goal-list" id="goal-list"></div>
+  <div class="cal-nav">
+    <button class="cal-arr" onclick="shiftCal(-1)">&#8249;</button>
+    <span class="cal-mon" id="cal-mon"></span>
+    <button class="cal-arr" onclick="shiftCal(1)">&#8250;</button>
+  </div>
+  <div class="cal-wrap">
+    <div class="cal-lbl">Days logged — tap any cell to see day</div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+</div>
+
+<!-- DATA -->
+<div class="screen" id="s-data">
+  <div class="hdr">
+    <div class="hdr-title">Your data</div>
+    <div class="hdr-sub">Export, import, backup</div>
+  </div>
+  <div class="data-section">
+    <div class="data-card">
+      <div class="data-title">Export to JSON</div>
+      <div class="data-desc">Download all your logged days as a JSON file. Keep this as a backup — you can re-import it on any device, any time, forever. No account needed.</div>
+      <button class="data-btn primary" onclick="exportData()">Download backup.json</button>
+    </div>
+    <div class="data-card">
+      <div class="data-title">Import from JSON</div>
+      <div class="data-desc">Restore from a previous backup file. This merges with existing data — it will not delete days you have already logged.</div>
+      <button class="data-btn" onclick="document.getElementById('file-input').click()">Choose backup file</button>
+      <input type="file" id="file-input" accept=".json" onchange="importData(event)">
+      <div class="data-msg" id="import-msg"></div>
+    </div>
+    <div class="data-card">
+      <div class="data-title">Export to CSV</div>
+      <div class="data-desc">Download a spreadsheet-friendly CSV — open in Excel or Google Sheets to review your history.</div>
+      <button class="data-btn" onclick="exportCSV()">Download data.csv</button>
+    </div>
+    <div class="data-card">
+      <div class="data-title">About this app</div>
+      <div class="data-desc">My Days v1.0 — works fully offline. All data lives on your device in localStorage. No servers, no accounts, no subscriptions. Export regularly to keep a backup.</div>
+    </div>
+    <div class="data-card">
+      <div class="data-title">Clear all data</div>
+      <div class="data-desc">Permanently delete all logged days. This cannot be undone. Export a backup first.</div>
+      <button class="data-btn danger" onclick="clearAll()">Delete all data</button>
+      <div class="data-msg err" id="clear-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn on" id="nb-today" onclick="goScreen('today')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+    Today
+  </button>
+  <button class="nav-btn" id="nb-history" onclick="goScreen('history')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    History
+  </button>
+  <button class="nav-btn" id="nb-progress" onclick="goScreen('progress')">
+    <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+    Progress
+  </button>
+  <button class="nav-btn" id="nb-data" onclick="goScreen('data')">
+    <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4.03 3-9 3S3 13.66 3 12M21 19c0 1.66-4.03 3-9 3S3 20.66 3 19"/><path d="M3 5v14M21 5v14"/></svg>
+    Data
+  </button>
+</nav>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="sheet" id="sheet"><div class="handle"></div><div id="modal-body"></div></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA DEFINITIONS ──
+const TASKS = {
+  weekday:{
+    morning:[{id:'wake',name:'Wake up by 7 am',time:'7:00 am'}],
+    body:[
+      {id:'gym',name:'Gym session',time:'1 hr'},
+      {id:'run',name:'Run / walk practice',time:'1 hr'},
+      {id:'kitchen',name:'Kitchen time under 1 hr',time:'< 1 hr'}
+    ],
+    mind:[
+      {id:'research',name:'Masters research + paper reading',time:'2 hrs'},
+      {id:'rl',name:'Reinforcement learning study',time:'incl.'}
+    ],
+    career:[
+      {id:'jobs',name:'Job hunting — apply / prep / network',time:'2 hrs'},
+      {id:'track',name:'Track progress and reflect',time:'1 hr'}
+    ],
+    home:[{id:'chores',name:'House chores',time:'< 2 hrs'}],
+    night:[{id:'sleep',name:'In bed by 11 pm',time:'11 pm'}]
+  },
+  hiking:{
+    hiking:[
+      {id:'hk-go',name:'Actually go — no bailing',time:''},
+      {id:'hk-phone',name:'Phone down 1 hr on trail',time:''},
+      {id:'hk-see',name:'Noticed something beautiful',time:''},
+      {id:'hk-fuel',name:'Ate and hydrated well',time:''},
+      {id:'hk-happy',name:'Felt happy at least once',time:''},
+      {id:'hk-proud',name:'Proud of myself today',time:''}
+    ]
+  },
+  cookday:{
+    cookday:[
+      {id:'ck-cook',name:'Meal prep / cooking session',time:'4 hrs'},
+      {id:'ck-clean',name:'Deep clean',time:'2 hrs'},
+      {id:'ck-run',name:'Run / walk',time:'1 hr'},
+      {id:'ck-me',name:'One thing just for me',time:''},
+      {id:'ck-proud',name:'Proud of what I made',time:''}
+    ]
+  }
+};
+
+const IDS = {
+  weekday:['wake','gym','run','kitchen','research','rl','jobs','track','chores','sleep'],
+  hiking:['hk-go','hk-phone','hk-see','hk-fuel','hk-happy','hk-proud'],
+  cookday:['ck-cook','ck-clean','ck-run','ck-me','ck-proud']
+};
+
+const MOODS = {
+  weekday:['💪 Productive','✨ Great','😐 Average','😩 Rough'],
+  hiking:['🌿 Peaceful','🔥 Energised','🤩 Amazing','😌 Reset'],
+  cookday:['💚 Nourished','🏠 Cosy','😤 Pushed through','😴 Low energy']
+};
+
+const GOALS = [
+  {label:'Remote DE role · AUD $160K',color:'#7F77DD',tasks:['jobs'],target:90},
+  {label:'Masters · first class',color:'#1D9E75',tasks:['research','rl'],target:180},
+  {label:'Fitness · toned and active',color:'#D4537E',tasks:['gym','run'],target:90},
+  {label:'Independence and happiness',color:'#BA7517',tasks:['track'],target:365}
+];
+
+// ── STATE ──
+let st = {type:'weekday', checked:{}, mood:'', note:''};
+let calView = new Date();
+
+// ── UTILS ──
+const $ = id => document.getElementById(id);
+const todayISO = () => new Date().toISOString().slice(0,10);
+
+function fmtLong(iso){
+  return new Date(iso+'T12:00:00').toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+function fmtShort(iso){
+  return new Date(iso+'T12:00:00').toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function toast(msg, dur=2200){
+  const el=$('toast'); el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), dur);
+}
+
+// ── STORAGE ──
+function saveDay(key, data){ localStorage.setItem('d_'+key, JSON.stringify(data)); }
+function loadDay(key){ try{return JSON.parse(localStorage.getItem('d_'+key))}catch{return null} }
+function allDays(){
+  const out=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith('d_')){ try{out.push(JSON.parse(localStorage.getItem(k)))}catch{} }
+  }
+  return out.sort((a,b)=>b.date.localeCompare(a.date));
+}
+
+function dayPct(d){
+  const ids=IDS[d.type]||[];
+  if(!ids.length) return 0;
+  return Math.round(ids.filter(id=>d.checked&&d.checked[id]).length/ids.length*100);
+}
+
+// ── INIT ──
+function init(){
+  const h=new Date().getHours();
+  $('greeting').textContent = h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  $('today-lbl').textContent = fmtLong(todayISO());
+  const saved=loadDay(todayISO());
+  if(saved){ st.type=saved.type||'weekday'; st.checked=saved.checked||{}; st.mood=saved.mood||''; st.note=saved.note||''; }
+  setType(st.type, true);
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ── TYPE SWITCH ──
+function setType(type, silent){
+  st.type=type;
+  ['weekday','hiking','cookday'].forEach(t=>{
+    $('ch-'+t).className='chip';
+    $('v-'+t).style.display='none';
+  });
+  $('ch-'+type).className='chip on-'+type;
+  $('v-'+type).style.display='block';
+  renderTasks(type);
+  renderMoods(type);
+  $('day-note').value=st.note||'';
+  if(!silent) autoSave();
+}
+
+// ── TASKS ──
+function renderTasks(type){
+  Object.keys(TASKS[type]).forEach(sec=>{
+    const el=$('tl-'+sec); if(!el) return;
+    el.innerHTML='';
+    TASKS[type][sec].forEach(t=>{
+      const done=!!(st.checked&&st.checked[t.id]);
+      const d=document.createElement('div');
+      d.className='ti'+(done?' done':'');
+      d.onclick=()=>toggleTask(t.id);
+      d.innerHTML=`<div class="ti-check"><svg viewBox="0 0 12 12"><polyline points="1.5,6.5 4.5,9.5 10.5,2.5"/></svg></div><div class="ti-name">${t.name}</div>${t.time?`<div class="ti-time">${t.time}</div>`:''}`;
+      el.appendChild(d);
+    });
+  });
+  updateRing(type);
+}
+
+function toggleTask(id){
+  st.checked[id]=!st.checked[id];
+  renderTasks(st.type);
+  autoSave();
+}
+
+function updateRing(type){
+  const ids=IDS[type], total=ids.length;
+  const done=ids.filter(id=>st.checked&&st.checked[id]).length;
+  const pct=total>0?Math.round(done/total*100):0;
+  const off=314.16*(1-pct/100);
+  const suf=type==='weekday'?'wd':type==='hiking'?'hk':'ck';
+  const rf=$('rf-'+suf); if(rf) rf.style.strokeDashoffset=off;
+  const rp=$('rp-'+suf); if(rp) rp.textContent=pct+'%';
+  const rf2=$('rf2-'+suf); if(rf2) rf2.textContent=done+'/'+total;
+}
+
+// ── MOODS ──
+function renderMoods(type){
+  const g=$('mood-grid'); g.innerHTML='';
+  MOODS[type].forEach(m=>{
+    const b=document.createElement('button');
+    b.className='mood-btn'+(st.mood===m?' on':'');
+    b.textContent=m;
+    b.onclick=()=>{ st.mood=m; renderMoods(type); autoSave(); };
+    g.appendChild(b);
+  });
+}
+
+// ── SAVE ──
+function autoSave(){
+  st.note=$('day-note').value;
+  saveDay(todayISO(),{type:st.type,checked:st.checked,mood:st.mood,note:st.note,date:todayISO()});
+}
+
+function saveToday(){
+  autoSave();
+  const el=$('save-msg'); el.textContent='Saved ✓';
+  setTimeout(()=>el.textContent='',2500);
+}
+
+$('day-note').addEventListener('input',()=>{ st.note=$('day-note').value; });
+
+// ── NAV ──
+function goScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  $('s-'+name).classList.add('active');
+  $('nb-'+name).classList.add('on');
+  if(name==='history') renderHistory();
+  if(name==='progress') renderProgress();
+}
+
+// ── HISTORY ──
+function renderHistory(){
+  const days=allDays();
+  $('hist-sub').textContent=days.length+' day'+(days.length!==1?'s':'')+' logged';
+  const streak=calcStreak(days);
+  const avg=days.length?Math.round(days.reduce((s,d)=>s+dayPct(d),0)/days.length):0;
+  $('hist-stats').innerHTML=`
+    <div class="sc"><div class="sc-num">${streak}</div><div class="sc-lbl">day streak</div></div>
+    <div class="sc"><div class="sc-num">${avg}%</div><div class="sc-lbl">avg completion</div></div>
+    <div class="sc"><div class="sc-num">${days.length}</div><div class="sc-lbl">total days</div></div>
+    <div class="sc"><div class="sc-num">${days.filter(d=>dayPct(d)===100).length}</div><div class="sc-lbl">perfect days</div></div>
+  `;
+  const list=$('hist-list');
+  if(!days.length){ list.innerHTML=`<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">No days logged yet.<br>Come back here after your first day.</div></div>`; return; }
+  list.innerHTML='';
+  days.forEach(d=>{
+    const pct=dayPct(d);
+    const label=d.type==='weekday'?'Weekday':d.type==='hiking'?'Hiking':'Cook day';
+    const card=document.createElement('div');
+    card.className='hc';
+    card.onclick=()=>openModal(d);
+    card.innerHTML=`<div class="hc-top"><span class="hc-date">${fmtShort(d.date)}</span><span class="hc-badge b-${d.type}">${label}</span></div><div class="hc-bar-bg"><div class="hc-bar-fill" style="width:${pct}%"></div></div><div class="hc-foot"><span>${pct}% complete</span><span>${d.mood||''}</span></div>${d.note?`<div class="hc-note">${d.note}</div>`:''}`;
+    list.appendChild(card);
+  });
+}
+
+function calcStreak(days){
+  if(!days.length) return 0;
+  const map={};
+  days.forEach(d=>map[d.date]=dayPct(d));
+  let streak=0, cur=new Date();
+  for(let i=0;i<400;i++){
+    const iso=cur.toISOString().slice(0,10);
+    if(map[iso]>0) streak++;
+    else if(iso!==todayISO()) break;
+    cur.setDate(cur.getDate()-1);
+  }
+  return streak;
+}
+
+// ── PROGRESS ──
+function renderProgress(){
+  const days=allDays();
+  const wdays=days.filter(d=>d.type==='weekday');
+  const gl=$('goal-list'); gl.innerHTML='';
+  GOALS.forEach(g=>{
+    const relevant=wdays.filter(d=>g.tasks.some(t=>d.checked&&d.checked[t]));
+    const pct=Math.min(100,Math.round(relevant.length/g.target*100));
+    const card=document.createElement('div');
+    card.className='gcard';
+    card.innerHTML=`<div class="g-top"><div class="g-title">${g.label}</div><div class="g-days">${relevant.length} days</div></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:${pct}%;background:${g.color}"></div></div><div class="g-sub">${pct}% of ${g.target}-day target</div>`;
+    gl.appendChild(card);
+  });
+  renderCal();
+}
+
+function shiftCal(dir){
+  calView=new Date(calView.getFullYear(),calView.getMonth()+dir,1);
+  renderCal();
+}
+
+function renderCal(){
+  const days=allDays();
+  const map={};
+  days.forEach(d=>map[d.date]=dayPct(d));
+  const y=calView.getFullYear(),m=calView.getMonth();
+  $('cal-mon').textContent=new Date(y,m,1).toLocaleDateString('en-AU',{month:'long',year:'numeric'});
+  const g=$('cal-grid'); g.innerHTML='';
+  ['S','M','T','W','T','F','S'].forEach(l=>{ const d=document.createElement('div'); d.className='cal-dl'; d.textContent=l; g.appendChild(d); });
+  const first=new Date(y,m,1).getDay();
+  for(let i=0;i<first;i++){ g.appendChild(document.createElement('div')); }
+  const dim=new Date(y,m+1,0).getDate();
+  for(let day=1;day<=dim;day++){
+    const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const cell=document.createElement('div');
+    cell.className='cal-cell';
+    const pct=map[iso];
+    if(pct!==undefined) cell.classList.add(pct>=100?'full':'partial');
+    if(iso===todayISO()) cell.classList.add('today');
+    cell.onclick=()=>{ const d=loadDay(iso); if(d) openModal(d); };
+    g.appendChild(cell);
+  }
+}
+
+// ── MODAL ──
+function openModal(day){
+  const pct=dayPct(day);
+  const label=day.type==='weekday'?'Weekday':day.type==='hiking'?'Hiking':'Cook day';
+  const allDefs=Object.values(TASKS[day.type]||{}).flat();
+  const taskHTML=(IDS[day.type]||[]).map(id=>{
+    const def=allDefs.find(t=>t.id===id);
+    const done=!!(day.checked&&day.checked[id]);
+    return `<div class="m-task"><div class="m-dot ${done?'done':'miss'}"></div><div class="m-tname ${done?'done':''}">${def?def.name:id}</div></div>`;
+  }).join('');
+  $('modal-body').innerHTML=`<div class="m-date">${fmtLong(day.date)}</div><span class="hc-badge b-${day.type}" style="display:inline-block;margin:4px 0 14px">${label} · ${pct}%</span>${taskHTML}${day.mood?`<div class="m-extra">${day.mood}</div>`:''}${day.note?`<div class="m-extra" style="margin-top:8px">${day.note}</div>`:''}<button class="m-close" onclick="closeModal()">Close</button>`;
+  $('overlay').classList.add('open');
+}
+
+function closeModal(e){
+  if(!e||e.target===$('overlay')) $('overlay').classList.remove('open');
+}
+
+// ── EXPORT JSON ──
+function exportData(){
+  const days=allDays();
+  if(!days.length){ toast('No data to export yet'); return; }
+  const blob=new Blob([JSON.stringify({version:1,exported:new Date().toISOString(),days},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='mydays-backup-'+todayISO()+'.json'; a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup downloaded');
+}
+
+// ── EXPORT CSV ──
+function exportCSV(){
+  const days=allDays();
+  if(!days.length){ toast('No data to export yet'); return; }
+  const allIds=[...IDS.weekday,...IDS.hiking,...IDS.cookday];
+  const header=['date','type','pct','mood','note',...allIds];
+  const rows=days.map(d=>[
+    d.date, d.type, dayPct(d), '"'+(d.mood||'').replace(/"/g,'')+'\"', '"'+(d.note||'').replace(/"/g,'').replace(/\n/g,' ')+'"',
+    ...allIds.map(id=>d.checked&&d.checked[id]?1:0)
+  ]);
+  const csv=[header,...rows].map(r=>r.join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='mydays-'+todayISO()+'.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV downloaded');
+}
+
+// ── IMPORT JSON ──
+function importData(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      const days=Array.isArray(data)?data:(data.days||[]);
+      if(!days.length){ $('import-msg').textContent='No days found in file'; return; }
+      let added=0;
+      days.forEach(d=>{
+        if(d.date){
+          const existing=loadDay(d.date);
+          if(!existing){ saveDay(d.date,d); added++; }
+        }
+      });
+      $('import-msg').textContent=`Imported ${added} new day${added!==1?'s':''} (${days.length-added} already existed)`;
+      toast('Import complete');
+    }catch(err){
+      $('import-msg').className='data-msg err';
+      $('import-msg').textContent='Could not read file — make sure it is a valid JSON backup';
+    }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ── CLEAR ALL ──
+function clearAll(){
+  if(!confirm('Delete all logged days? This cannot be undone.\n\nExport a backup first if you need the data.')) return;
+  const keys=[];
+  for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('d_')) keys.push(k); }
+  keys.forEach(k=>localStorage.removeItem(k));
+  $('clear-msg').textContent='All data deleted';
+  toast('Data cleared');
+}
+
+init();
+</script>
+</body>
+</html>
