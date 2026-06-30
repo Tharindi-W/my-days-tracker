@@ -1,4 +1,4 @@
-const CACHE = 'mydays-v1';
+const CACHE = 'mydays-v2';
 const FILES = ['./index.html', './manifest.json'];
 
 self.addEventListener('install', e => {

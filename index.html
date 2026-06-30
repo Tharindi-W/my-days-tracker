@@ -165,6 +165,33 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:15
 .cal-cell.full{background:var(--teal)}
 .cal-cell.today{outline:2px solid var(--teal);outline-offset:1px}
 
+/* ── WEEKLY ── */
+.wk-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 4px}
+.wk-range{font-size:15px;font-weight:500}
+.wk-hint{font-size:12px;color:var(--text3);text-align:center;padding:2px 28px 4px;line-height:1.5}
+.mscard{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);padding:14px 15px;margin:12px 20px 0}
+.ms-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.ms-title{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+.ms-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ms-count{font-size:12px;color:var(--text2);white-space:nowrap}
+.ms-bar-bg{height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.ms-bar-fill{height:100%;border-radius:99px;transition:width .5s ease}
+.mi{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:.5px solid var(--border)}
+.mi:last-child{border-bottom:none}
+.mi-check{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s}
+.mi.done .mi-check{background:var(--teal);border-color:var(--teal)}
+.mi-check svg{width:11px;height:11px;stroke:#fff;stroke-width:2.5;fill:none;display:none}
+.mi.done .mi-check svg{display:block}
+.mi-body{flex:1;cursor:pointer;min-width:0}
+.mi-name{font-size:14px;color:var(--text);line-height:1.35}
+.mi.done .mi-name{text-decoration:line-through;color:var(--text3)}
+.mi-est{font-size:11px;color:var(--text3);margin-top:1px}
+.mi-star{width:30px;height:30px;flex-shrink:0;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.mi-star svg{width:19px;height:19px;stroke:var(--text3);stroke-width:1.6;fill:none;transition:all .15s}
+.mi.focus .mi-star svg{fill:var(--amber);stroke:var(--amber)}
+.mi.focus{position:relative}
+.mi.focus .mi-name{font-weight:500}
+
 /* ── DATA MGMT ── */
 .data-section{padding:14px 20px 0}
 .data-card{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);padding:15px}
@@ -225,9 +252,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:15
       <div class="ring-inner"><span class="ring-pct" id="rp-wd">0%</span><span class="ring-frac" id="rf2-wd">0/0</span></div>
     </div></div>
     <div class="sec">Morning</div><div class="tl" id="tl-morning"></div>
-    <div class="sec">Body</div><div class="tl" id="tl-body"></div>
-    <div class="sec">Mind</div><div class="tl" id="tl-mind"></div>
     <div class="sec">Career</div><div class="tl" id="tl-career"></div>
+    <div class="sec">Study</div><div class="tl" id="tl-study"></div>
+    <div class="sec">Body</div><div class="tl" id="tl-body"></div>
+    <div class="sec">Enjoy</div><div class="tl" id="tl-enjoy"></div>
     <div class="sec">Home</div><div class="tl" id="tl-home"></div>
     <div class="sec">Night</div><div class="tl" id="tl-night"></div>
   </div>
@@ -278,6 +306,31 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:15
   </div>
 </div>
 
+<!-- WEEKLY -->
+<div class="screen" id="s-weekly">
+  <div class="hdr">
+    <div class="hdr-title">Weekly goals</div>
+    <div class="hdr-sub">PhD · MSc · DE learning</div>
+  </div>
+
+  <div class="wk-nav">
+    <button class="cal-arr" onclick="shiftWeek(-1)">&#8249;</button>
+    <div class="wk-range" id="wk-range"></div>
+    <button class="cal-arr" onclick="shiftWeek(1)">&#8250;</button>
+  </div>
+
+  <div class="ring-wrap"><div class="ring-rel">
+    <svg class="ring-svg" width="120" height="120" viewBox="0 0 120 120">
+      <circle class="ring-bg-c" cx="60" cy="60" r="50"/>
+      <circle class="ring-fg" id="rf-wk" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+    </svg>
+    <div class="ring-inner"><span class="ring-pct" id="rp-wk">0%</span><span class="ring-frac" id="rf2-wk">0/0</span></div>
+  </div></div>
+  <div class="wk-hint" id="wk-hint">Tap the star on any milestone to set it as this week's focus.</div>
+
+  <div id="ms-list"></div>
+</div>
+
 <!-- HISTORY -->
 <div class="screen" id="s-history">
   <div class="hdr">
@@ -301,7 +354,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:15
     <button class="cal-arr" onclick="shiftCal(1)">&#8250;</button>
   </div>
   <div class="cal-wrap">
-    <div class="cal-lbl">Days logged — tap any cell to see day</div>
+    <div class="cal-lbl">Days logged - tap any cell to see day</div>
     <div class="cal-grid" id="cal-grid"></div>
   </div>
 </div>
@@ -315,24 +368,29 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:15
   <div class="data-section">
     <div class="data-card">
       <div class="data-title">Export to JSON</div>
-      <div class="data-desc">Download all your logged days as a JSON file. Keep this as a backup — you can re-import it on any device, any time, forever. No account needed.</div>
+      <div class="data-desc">Download all your logged days as a JSON file. Keep this as a backup - you can re-import it on any device, any time, forever. No account needed.</div>
       <button class="data-btn primary" onclick="exportData()">Download backup.json</button>
     </div>
     <div class="data-card">
       <div class="data-title">Import from JSON</div>
-      <div class="data-desc">Restore from a previous backup file. This merges with existing data — it will not delete days you have already logged.</div>
+      <div class="data-desc">Restore from a previous backup file. This merges with existing data - it will not delete days you have already logged.</div>
       <button class="data-btn" onclick="document.getElementById('file-input').click()">Choose backup file</button>
       <input type="file" id="file-input" accept=".json" onchange="importData(event)">
       <div class="data-msg" id="import-msg"></div>
     </div>
     <div class="data-card">
       <div class="data-title">Export to CSV</div>
-      <div class="data-desc">Download a spreadsheet-friendly CSV — open in Excel or Google Sheets to review your history.</div>
+      <div class="data-desc">Download a spreadsheet-friendly CSV - open in Excel or Google Sheets to review your history.</div>
       <button class="data-btn" onclick="exportCSV()">Download data.csv</button>
     </div>
     <div class="data-card">
+      <div class="data-title">Export milestones to CSV</div>
+      <div class="data-desc">Download your PhD, MSc and DE-learning milestone progress as a spreadsheet.</div>
+      <button class="data-btn" onclick="exportMilestonesCSV()">Download milestones.csv</button>
+    </div>
+    <div class="data-card">
       <div class="data-title">About this app</div>
-      <div class="data-desc">My Days v1.0 — works fully offline. All data lives on your device in localStorage. No servers, no accounts, no subscriptions. Export regularly to keep a backup.</div>
+      <div class="data-desc">My Days v2.0 - daily tracker plus weekly milestone goals. Works fully offline. All data lives on your device in localStorage. No servers, no accounts, no subscriptions. Export regularly to keep a backup.</div>
     </div>
     <div class="data-card">
       <div class="data-title">Clear all data</div>
@@ -348,6 +406,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:15
   <button class="nav-btn on" id="nb-today" onclick="goScreen('today')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
     Today
+  </button>
+  <button class="nav-btn" id="nb-weekly" onclick="goScreen('weekly')">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    Weekly
   </button>
   <button class="nav-btn" id="nb-history" onclick="goScreen('history')">
     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -376,25 +438,31 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:15
 const TASKS = {
   weekday:{
     morning:[{id:'wake',name:'Wake up by 7 am',time:'7:00 am'}],
+    career:[
+      {id:'jobapply',name:'Job apply: narrow to 3-yr-fit companies',time:'1.5 hrs'},
+      {id:'defund',name:'DE fundamentals: SQL / Python drills',time:'1.5 hrs'}
+    ],
+    study:[
+      {id:'thesis',name:'MSc thesis: chapter / papers',time:'2 hrs'},
+      {id:'rl',name:'RL theory: David Silver lecture',time:'45 min'}
+    ],
     body:[
       {id:'gym',name:'Gym session',time:'1 hr'},
-      {id:'run',name:'Run / walk practice',time:'1 hr'},
-      {id:'kitchen',name:'Kitchen time under 1 hr',time:'< 1 hr'}
+      {id:'run',name:'Run / walk practice',time:'30 min'}
     ],
-    mind:[
-      {id:'research',name:'Masters research + paper reading',time:'2 hrs'},
-      {id:'rl',name:'Reinforcement learning study',time:'incl.'}
+    enjoy:[
+      {id:'enjoy',name:'One enjoy thing: makeup / hair / clothing',time:'30 min'},
+      {id:'kitchen',name:'Kitchen / foodie recipe',time:'< 1 hr'}
     ],
-    career:[
-      {id:'jobs',name:'Job hunting — apply / prep / network',time:'2 hrs'},
-      {id:'track',name:'Track progress and reflect',time:'1 hr'}
-    ],
-    home:[{id:'chores',name:'House chores',time:'< 2 hrs'}],
-    night:[{id:'sleep',name:'In bed by 11 pm',time:'11 pm'}]
+    home:[{id:'chores',name:'House chores',time:'< 1 hr'}],
+    night:[
+      {id:'reflect',name:'Reflect + log progress',time:'15 min'},
+      {id:'sleep',name:'In bed by 11 pm',time:'11:00 pm'}
+    ]
   },
   hiking:{
     hiking:[
-      {id:'hk-go',name:'Actually go — no bailing',time:''},
+      {id:'hk-go',name:'Actually go - no bailing',time:''},
       {id:'hk-phone',name:'Phone down 1 hr on trail',time:''},
       {id:'hk-see',name:'Noticed something beautiful',time:''},
       {id:'hk-fuel',name:'Ate and hydrated well',time:''},
@@ -414,7 +482,7 @@ const TASKS = {
 };
 
 const IDS = {
-  weekday:['wake','gym','run','kitchen','research','rl','jobs','track','chores','sleep'],
+  weekday:['wake','jobapply','defund','thesis','rl','gym','run','enjoy','kitchen','chores','reflect','sleep'],
   hiking:['hk-go','hk-phone','hk-see','hk-fuel','hk-happy','hk-proud'],
   cookday:['ck-cook','ck-clean','ck-run','ck-me','ck-proud']
 };
@@ -426,15 +494,80 @@ const MOODS = {
 };
 
 const GOALS = [
-  {label:'Remote DE role · AUD $160K',color:'#7F77DD',tasks:['jobs'],target:90},
-  {label:'Masters · first class',color:'#1D9E75',tasks:['research','rl'],target:180},
+  {label:'Remote DE role · AUD $160K',color:'#7F77DD',tasks:['jobapply','defund'],target:90},
+  {label:'Masters · first class',color:'#1D9E75',tasks:['thesis','rl'],target:180},
   {label:'Fitness · toned and active',color:'#D4537E',tasks:['gym','run'],target:90},
-  {label:'Independence and happiness',color:'#BA7517',tasks:['track'],target:365}
+  {label:'Independence and happiness',color:'#BA7517',tasks:['enjoy','reflect'],target:365}
 ];
+
+// ── WEEKLY MILESTONE BACKLOGS ──
+// Permanent check-offs (done stays done). Star any to set them as this week's focus.
+const MILESTONES = [
+  {
+    id:'phd', label:'PhD', color:'#7F77DD', bg:'var(--purple-bg)', dark:'var(--purple-dark)',
+    items:[
+      {id:'phd-kaveesh',  name:'Talk to Kaveesh',                 est:'30 min'},
+      {id:'phd-randula',  name:'Talk to Randula',                 est:'30 min'},
+      {id:'phd-hashan',   name:'Talk to Hashan',                  est:'30 min'},
+      {id:'phd-aicivil',  name:'Talk to AI / Civil contact',      est:'30 min'},
+      {id:'phd-aiwork',   name:'Talk to AI / Civil (in industry)',est:'30 min'},
+      {id:'phd-csv',      name:'Build CSV of target professors',  est:'~3 hrs'},
+      {id:'phd-sop1',     name:'Write SOP draft 1',               est:'~4 hrs'},
+      {id:'phd-sop2',     name:'Write SOP draft 2',               est:'~3 hrs'},
+      {id:'phd-niche',    name:'Research AI / Civil niche deeper', est:'~1 wk'}
+    ]
+  },
+  {
+    id:'msc', label:'MSc Thesis', color:'#1D9E75', bg:'var(--teal-bg)', dark:'var(--teal-dark)',
+    items:[
+      {id:'msc-c1',   name:'Chapter 1 end to end',     est:'~3 days'},
+      {id:'msc-c2',   name:'Chapter 2 end to end',     est:'~3 days'},
+      {id:'msc-c3',   name:'Chapter 3 end to end',     est:'~3 days'},
+      {id:'msc-c4',   name:'Chapter 4 end to end',     est:'~3 days'},
+      {id:'msc-c5',   name:'Chapter 5 end to end',     est:'~3 days'},
+      {id:'msc-c6',   name:'Chapter 6 end to end',     est:'~3 days'},
+      {id:'msc-c7',   name:'Chapter 7 end to end',     est:'~3 days'},
+      {id:'msc-p1',   name:'Research papers 1 to 5',    est:'~2 days'},
+      {id:'msc-p2',   name:'Research papers 5 to 10',   est:'~2 days'},
+      {id:'msc-p3',   name:'Research papers 10 to 16',  est:'~2 days'},
+      {id:'msc-p4',   name:'Research papers 17 to 23',  est:'~2 days'},
+      {id:'msc-p5',   name:'Research papers 24 to 30',  est:'~2 days'},
+      {id:'msc-p6',   name:'Research papers 30 to 40',  est:'~2 days'},
+      {id:'msc-pr1',  name:'Presentation 1',            est:'~1 day'},
+      {id:'msc-pr2',  name:'Presentation 2',            est:'~1 day'},
+      {id:'msc-pr3',  name:'Presentation 3',            est:'~1 day'},
+      {id:'msc-log',  name:'Weekly log upkeep',         est:'30 min'},
+      {id:'msc-code', name:'Code compile / reproducible',est:'~2 days'},
+      {id:'msc-sub',  name:'Complete thesis submission', est:'milestone'}
+    ]
+  },
+  {
+    id:'de', label:'DE Learning', color:'#BA7517', bg:'var(--amber-bg)', dark:'var(--amber-dark)',
+    items:[
+      {id:'de-sql',   name:'SQL: same result, different commands', est:'~2 hrs'},
+      {id:'de-py1',   name:'Python set W1 (5 problems)',  est:'~2 hrs'},
+      {id:'de-py2',   name:'Python set W2 (5 problems)',  est:'~2 hrs'},
+      {id:'de-py3',   name:'Python set W3 (5 problems)',  est:'~2 hrs'},
+      {id:'de-py4',   name:'Python set W4 (5 problems)',  est:'~2 hrs'},
+      {id:'de-vec',   name:'Vector DB demo to GitHub',     est:'~1 day'},
+      {id:'de-rl',    name:'Small RL project to GitHub',   est:'~2 days'},
+      {id:'de-air',   name:'Demo: Airflow + something',    est:'~1 day'},
+      {id:'de-lam',   name:'Demo: AWS Lambda',             est:'~1 day'},
+      {id:'de-glue',  name:'Demo: AWS Glue',               est:'~1 day'},
+      {id:'de-spark', name:'Demo: PySpark',                est:'~1 day'},
+      {id:'de-silver',name:'David Silver lectures 5 to 10',est:'~1 wk'},
+      {id:'de-dsa',   name:'Stanford Data Structures & Algorithms', est:'ongoing'},
+      {id:'de-theory',name:'Claude Code: learn theory 1 & 2', est:'~3 hrs'},
+      {id:'de-apply', name:'Apply learnings to a project',  est:'~1 wk'}
+    ]
+  }
+];
+const MS_IDS = MILESTONES.flatMap(c=>c.items.map(i=>i.id));
 
 // ── STATE ──
 let st = {type:'weekday', checked:{}, mood:'', note:''};
 let calView = new Date();
+let wkView = mondayOf(new Date());
 
 // ── UTILS ──
 const $ = id => document.getElementById(id);
@@ -468,6 +601,37 @@ function dayPct(d){
   const ids=IDS[d.type]||[];
   if(!ids.length) return 0;
   return Math.round(ids.filter(id=>d.checked&&d.checked[id]).length/ids.length*100);
+}
+
+// ── WEEK UTILS ──
+function mondayOf(date){
+  const d=new Date(date);
+  const day=(d.getDay()+6)%7; // Mon=0 ... Sun=6
+  d.setHours(12,0,0,0);
+  d.setDate(d.getDate()-day);
+  return d;
+}
+function weekKey(date){ return mondayOf(date).toISOString().slice(0,10); }
+function weekRangeLabel(monday){
+  const sun=new Date(monday); sun.setDate(sun.getDate()+6);
+  const opt={day:'numeric',month:'short'};
+  const a=monday.toLocaleDateString('en-AU',opt);
+  const b=sun.toLocaleDateString('en-AU',opt);
+  const thisWk=weekKey(new Date())===weekKey(monday);
+  return (thisWk?'This week · ':'')+a+' to '+b;
+}
+
+// ── MILESTONE STORAGE ──
+// Permanent done-state for milestones (survives across weeks).
+function loadMsDone(){ try{return JSON.parse(localStorage.getItem('ms_done'))||{}}catch{return {}} }
+function saveMsDone(o){ localStorage.setItem('ms_done',JSON.stringify(o)); }
+// Per-week focus picks, keyed by Monday ISO.
+function loadFocus(wk){ try{return JSON.parse(localStorage.getItem('wf_'+wk))||{}}catch{return {}} }
+function saveFocus(wk,o){ localStorage.setItem('wf_'+wk,JSON.stringify(o)); }
+function allFocusKeys(){
+  const out=[];
+  for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('wf_')) out.push(k); }
+  return out;
 }
 
 // ── INIT ──
@@ -562,6 +726,7 @@ function goScreen(name){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
   $('s-'+name).classList.add('active');
   $('nb-'+name).classList.add('on');
+  if(name==='weekly') renderWeekly();
   if(name==='history') renderHistory();
   if(name==='progress') renderProgress();
 }
@@ -650,6 +815,70 @@ function renderCal(){
   }
 }
 
+// ── WEEKLY ──
+function shiftWeek(dir){
+  wkView=new Date(wkView); wkView.setDate(wkView.getDate()+dir*7);
+  wkView=mondayOf(wkView);
+  renderWeekly();
+}
+
+function renderWeekly(){
+  const wk=weekKey(wkView);
+  const done=loadMsDone();
+  const focus=loadFocus(wk);
+  $('wk-range').textContent=weekRangeLabel(wkView);
+
+  // weekly ring = focus items done / focus items total
+  const focusIds=MS_IDS.filter(id=>focus[id]);
+  const focusDone=focusIds.filter(id=>done[id]).length;
+  const pct=focusIds.length?Math.round(focusDone/focusIds.length*100):0;
+  $('rf-wk').style.strokeDashoffset=314.16*(1-pct/100);
+  $('rp-wk').textContent=pct+'%';
+  $('rf2-wk').textContent=focusDone+'/'+focusIds.length;
+  $('wk-hint').textContent=focusIds.length
+    ? focusDone+' of '+focusIds.length+" focus tasks done this week"
+    : "Tap the star on any milestone to set it as this week's focus.";
+
+  const wrap=$('ms-list'); wrap.innerHTML='';
+  MILESTONES.forEach(cat=>{
+    const total=cat.items.length;
+    const cdone=cat.items.filter(i=>done[i.id]).length;
+    const cpct=Math.round(cdone/total*100);
+    const card=document.createElement('div');
+    card.className='mscard';
+    let rows='';
+    cat.items.forEach(it=>{
+      const isDone=!!done[it.id];
+      const isFocus=!!focus[it.id];
+      rows+=`<div class="mi${isDone?' done':''}${isFocus?' focus':''}">
+        <div class="mi-check" onclick="toggleMilestone('${it.id}')"><svg viewBox="0 0 12 12"><polyline points="1.5,6.5 4.5,9.5 10.5,2.5"/></svg></div>
+        <div class="mi-body" onclick="toggleMilestone('${it.id}')"><div class="mi-name">${it.name}</div><div class="mi-est">${it.est}</div></div>
+        <button class="mi-star" onclick="toggleFocus('${it.id}')" aria-label="Set as this week's focus"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+      </div>`;
+    });
+    card.innerHTML=`<div class="ms-head"><div class="ms-title"><span class="ms-dot" style="background:${cat.color}"></span>${cat.label}</div><div class="ms-count">${cdone}/${total} done</div></div>
+      <div class="ms-bar-bg"><div class="ms-bar-fill" style="width:${cpct}%;background:${cat.color}"></div></div>${rows}`;
+    wrap.appendChild(card);
+  });
+}
+
+function toggleMilestone(id){
+  const done=loadMsDone();
+  done[id]=!done[id];
+  if(!done[id]) delete done[id];
+  saveMsDone(done);
+  renderWeekly();
+}
+
+function toggleFocus(id){
+  const wk=weekKey(wkView);
+  const focus=loadFocus(wk);
+  focus[id]=!focus[id];
+  if(!focus[id]) delete focus[id];
+  saveFocus(wk,focus);
+  renderWeekly();
+}
+
 // ── MODAL ──
 function openModal(day){
   const pct=dayPct(day);
@@ -671,8 +900,12 @@ function closeModal(e){
 // ── EXPORT JSON ──
 function exportData(){
   const days=allDays();
-  if(!days.length){ toast('No data to export yet'); return; }
-  const blob=new Blob([JSON.stringify({version:1,exported:new Date().toISOString(),days},null,2)],{type:'application/json'});
+  const msDone=loadMsDone();
+  const focus={};
+  allFocusKeys().forEach(k=>{ try{focus[k.slice(3)]=JSON.parse(localStorage.getItem(k))}catch{} });
+  if(!days.length && !Object.keys(msDone).length){ toast('No data to export yet'); return; }
+  const payload={version:2,exported:new Date().toISOString(),days,milestones:msDone,weeklyFocus:focus};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url; a.download='mydays-backup-'+todayISO()+'.json'; a.click();
@@ -699,6 +932,23 @@ function exportCSV(){
   toast('CSV downloaded');
 }
 
+// ── EXPORT MILESTONES CSV ──
+function exportMilestonesCSV(){
+  const done=loadMsDone();
+  const header=['category','milestone','estimate','done'];
+  const rows=[];
+  MILESTONES.forEach(cat=>cat.items.forEach(it=>{
+    rows.push([cat.label, '"'+it.name.replace(/"/g,'')+'"', '"'+it.est+'"', done[it.id]?1:0]);
+  }));
+  const csv=[header,...rows].map(r=>r.join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='mydays-milestones-'+todayISO()+'.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('Milestones CSV downloaded');
+}
+
 // ── IMPORT JSON ──
 function importData(e){
   const file=e.target.files[0]; if(!file) return;
@@ -707,7 +957,7 @@ function importData(e){
     try{
       const data=JSON.parse(ev.target.result);
       const days=Array.isArray(data)?data:(data.days||[]);
-      if(!days.length){ $('import-msg').textContent='No days found in file'; return; }
+      if(!days.length && !data.milestones){ $('import-msg').textContent='No days found in file'; return; }
       let added=0;
       days.forEach(d=>{
         if(d.date){
@@ -715,11 +965,23 @@ function importData(e){
           if(!existing){ saveDay(d.date,d); added++; }
         }
       });
+      if(data.milestones){
+        const cur=loadMsDone();
+        Object.keys(data.milestones).forEach(id=>{ if(data.milestones[id]) cur[id]=true; });
+        saveMsDone(cur);
+      }
+      if(data.weeklyFocus){
+        Object.keys(data.weeklyFocus).forEach(wk=>{
+          const cur=loadFocus(wk);
+          Object.keys(data.weeklyFocus[wk]||{}).forEach(id=>{ if(data.weeklyFocus[wk][id]) cur[id]=true; });
+          saveFocus(wk,cur);
+        });
+      }
       $('import-msg').textContent=`Imported ${added} new day${added!==1?'s':''} (${days.length-added} already existed)`;
       toast('Import complete');
     }catch(err){
       $('import-msg').className='data-msg err';
-      $('import-msg').textContent='Could not read file — make sure it is a valid JSON backup';
+      $('import-msg').textContent='Could not read file - make sure it is a valid JSON backup';
     }
   };
   reader.readAsText(file);
@@ -730,7 +992,7 @@ function importData(e){
 function clearAll(){
   if(!confirm('Delete all logged days? This cannot be undone.\n\nExport a backup first if you need the data.')) return;
   const keys=[];
-  for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('d_')) keys.push(k); }
+  for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&(k.startsWith('d_')||k.startsWith('wf_')||k==='ms_done')) keys.push(k); }
   keys.forEach(k=>localStorage.removeItem(k));
   $('clear-msg').textContent='All data deleted';
   toast('Data cleared');
