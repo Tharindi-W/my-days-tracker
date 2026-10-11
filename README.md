@@ -8,15 +8,21 @@ A lightweight, offline-first Progressive Web App for daily habit and routine tra
 
 ## Features
 
-- Three day modes: Weekday, Hiking day, Cook day
-- Circular progress ring per day
-- Mood logging and daily notes
-- Full history with streak counter and completion stats
-- Monthly calendar heatmap
-- Goal progress tracking across four life goals
+- Four day types that pick themselves by weekday (tap a chip to change):
+  - **WFH** (Mon, Fri): PhD block before work, career hour after the gym
+  - **Office** (Tue, Wed, Thu): read a paper on the commute in, save jobs on the way home
+  - **Trip / party** (Sat): no-guilt day out, with an optional 15-minute tiny win
+  - **Cook · clean · shop** (Sun): groceries + meal prep for the week, then a 2-hour PhD/career power block
+- A timed plan for each day type, with the current block highlighted
+- Six daily goals rated 1 to 5 stars, scored out of 100 (total stars x 100 / 30)
+- Daily tallies for jobs applied, GitHub pushes, papers read and professors emailed, with weekly targets
+- Countdown to the end of the contract (20 Jan 2027) and the December hiring slowdown
+- Weekly milestones for the PhD, the next job and GitHub, with a weekly focus star
+- History, a 14-day score trend, 6-goal averages and a calendar heatmap
+- Edit a past day if you forgot to rate it the night before
 - Export data as JSON (backup/restore) or CSV (spreadsheet)
 - Works fully offline after first load
-- No backend, no account, no tracking — data stays on your device
+- No backend, no account, no tracking: data stays on your device
 
 ## Tech stack
 

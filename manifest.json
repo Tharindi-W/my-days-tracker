@@ -1,7 +1,7 @@
 {
   "name": "My Days",
   "short_name": "My Days",
-  "description": "Daily tracker plus weekly milestone goals",
+  "description": "Four day types, six daily goals scored out of 100, weekly PhD and job milestones",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#F7F5F0",
